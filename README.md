@@ -16,4 +16,4 @@ $$ (O_2, N_2, CO_2, CO, H_2O, C_x H_y, etc.) $$
 - Outputs:
   - $M, R, v, u, h, s, k, \mu$
 - Model Parameters:
--   $R_u, M, \frac{\bar{C_p}}{R} = f(T), h_f^o$
+  - $R_u, M, \frac{\bar{C_p}}{R} = f(T), h_f^o$
