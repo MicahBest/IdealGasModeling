@@ -21,5 +21,12 @@ if __name__ == "__main__":
     files = os.listdir(path)
     for file in files:
         if file.endswith(".txt"):
-            file_path = os.path.join(path, file).replace(".txt", '')
-            txt_to_csv(file_path)
+            file_path = os.path.join(path, file)
+            txt_to_csv(file_path.replace(".txt", ''))
+
+            # move txt to different directory
+            new_path = path+"_txt/"
+            txt_path = os.path.join(new_path, file)
+            if not os.path.exists(new_path):
+                os.mkdir(new_path)
+            os.rename(file_path, txt_path)
