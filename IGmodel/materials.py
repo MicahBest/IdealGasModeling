@@ -68,13 +68,6 @@ class CO2(IdealGas):
         self._R = 0.1889 # kJ/kg-K
         super().__init__(self._property_table)
 
-class H2O_vapor_IG(IdealGas):
-    def __init__(self) -> None:
-        self._property_table = "H2O-vapor-ideal-gas.csv"
-        self._M = 18.015 # kg/kmol
-        self._R = 0.4615 # kJ/kg-K
-        super().__init__(self._property_table)
-
 class CO(IdealGas):
     def __init__(self) -> None:
         self._property_table = "CO-vapor-ideal-gas.csv"
@@ -82,11 +75,11 @@ class CO(IdealGas):
         self._R = 0.2968 # kJ/kg-K
         super().__init__(self._property_table)
 
-class H2(IdealGas):
+class H2O_vapor_IG(IdealGas):
     def __init__(self) -> None:
-        self._property_table = "H2-vapor-ideal-gas.csv"
-        self._M = 2.016  # kg/kmol
-        self._R = 4.1240 # kJ/kg-K
+        self._property_table = "H2O-vapor-ideal-gas.csv"
+        self._M = 18.015 # kg/kmol
+        self._R = 0.4615 # kJ/kg-K
         super().__init__(self._property_table)
 
 if __name__ == "__main__":
