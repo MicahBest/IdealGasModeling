@@ -10,6 +10,8 @@ disable=
     fixme,
     invalid-name,
     missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
     pointless-string-statement,
     redefined-outer-name,
     too-few-public-methods,
