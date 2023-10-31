@@ -7,21 +7,24 @@ PROPERTY_TABLE_PATH = "IGmodel/property-tables/"
 
 @add_metaclass(abc.ABCMeta)
 class Material:
-    def __init__(self) -> None:
-        pass
+    def __init__(self, M, R) -> None:
+        self._M = M # kg/kmol
+        self._R = R # kJ/kg-K
 
-    def _interpolate(self, x, x_known, y_known) -> float:
+    @staticmethod
+    def _interpolate(x, x_known, y_known) -> float:
         f = interp1d(x_known, y_known, kind="linear")
         return f(x)
 
 class H2O(Material):
-    def __init__(self, phase: str="liquid") -> None:
-        super().__init__()
+    def __init__(self, phase="liquid") -> None:
+        M = 18.015 # kg/kmol
+        R = 0.4615 # kJ/kg-K
+        super().__init__(M=M, R=R)
         self._phase = phase
-        self._M = 18.015 # kg/kmol
-        self._R = 0.4615 # kJ/kg-K
-        self._property_table = "H2O-sat-temperature.csv"
-        df = pd.read_csv(PROPERTY_TABLE_PATH+self._property_table)
+
+        property_table = "H2O-sat-temperature.csv"
+        df = pd.read_csv(PROPERTY_TABLE_PATH+property_table)
 
         self._T = df["T"].to_numpy()
         self._Psat = df["Psat"].to_numpy()
@@ -40,11 +43,14 @@ class H2O(Material):
             self._s = df["sg"].to_numpy()
 
     def enthalpy(self, T):
+        """Specific enthalpy [kJ/kg]"""
         return self._interpolate(T, self._T, self._h)
 
 class IdealGas(Material):
-    def __init__(self, property_file: str) -> None:
-        super().__init__()
+    def __init__(self, M: float, R: float, property_file: str, Cp_coefs: list) -> None:
+        super().__init__(M=M, R=R)
+        self._Cp_coefs = Cp_coefs
+
         df = pd.read_csv(PROPERTY_TABLE_PATH+property_file)
         self._T = df["T"].to_numpy()
         self._h_bar = df["h-bar"].to_numpy()
@@ -63,43 +69,43 @@ class IdealGas(Material):
 
 class O2(IdealGas):
     def __init__(self) -> None:
-        self._property_table = "O2-ideal-gas.csv"
-        self._M = 31.999 # kg/kmol
-        self._R = 0.2598 # kJ/kg-K
-        self._Cp_coefs = [25.48, 1.520e-2, -0.7155e-5, 1.312e-9]
-        super().__init__(self._property_table)
+        M = 31.999 # kg/kmol
+        R = 0.2598 # kJ/kg-K
+        property_table = "O2-ideal-gas.csv"
+        Cp_coefs = [25.48, 1.520e-2, -0.7155e-5, 1.312e-9]
+        super().__init__(M, R, property_table, Cp_coefs)
 
 class N2(IdealGas):
     def __init__(self) -> None:
-        self._property_table = "N2-ideal-gas.csv"
-        self._M = 28.013 # kg/kmol
-        self._R = 0.2968 # kJ/kg-K
-        self._Cp_coefs = [28.90, -0.1571e-2, 0.8081e-5, -2.873e-9]
-        super().__init__(self._property_table)
+        M = 28.013 # kg/kmol
+        R = 0.2968 # kJ/kg-K
+        property_table = "N2-ideal-gas.csv"
+        Cp_coefs = [28.90, -0.1571e-2, 0.8081e-5, -2.873e-9]
+        super().__init__(M, R, property_table, Cp_coefs)
 
 class CO2(IdealGas):
     def __init__(self) -> None:
-        self._property_table = "CO2-ideal-gas.csv"
-        self._M = 44.01  # kg/kmol
-        self._R = 0.1889 # kJ/kg-K
-        self._Cp_coefs = [22.26, 5.981e-2, -3.501e-5, 7.469e-9]
-        super().__init__(self._property_table)
+        M = 44.01  # kg/kmol
+        R = 0.1889 # kJ/kg-K
+        property_table = "CO2-ideal-gas.csv"
+        Cp_coefs = [22.26, 5.981e-2, -3.501e-5, 7.469e-9]
+        super().__init__(M, R, property_table, Cp_coefs)
 
 class CO(IdealGas):
     def __init__(self) -> None:
-        self._property_table = "CO-vapor-ideal-gas.csv"
-        self._M = 28.011 # kg/kmol
-        self._R = 0.2968 # kJ/kg-K
-        self._Cp_coefs = [28.16, 0.1675e-2, 0.5375e-5, -2.222e-9]
-        super().__init__(self._property_table)
+        M = 28.011 # kg/kmol
+        R = 0.2968 # kJ/kg-K
+        property_table = "CO-vapor-ideal-gas.csv"
+        Cp_coefs = [28.16, 0.1675e-2, 0.5375e-5, -2.222e-9]
+        super().__init__(M, R, property_table, Cp_coefs)
 
 class H2O_vapor_IG(IdealGas):
     def __init__(self) -> None:
-        self._property_table = "H2O-vapor-ideal-gas.csv"
-        self._M = 18.015 # kg/kmol
-        self._R = 0.4615 # kJ/kg-K
-        self._Cp_coefs = [32.24, 0.1923e-2, 1.055e-5, -3.595e-9]
-        super().__init__(self._property_table)
+        M = 18.015 # kg/kmol
+        R = 0.4615 # kJ/kg-K
+        property_table = "H2O-vapor-ideal-gas.csv"
+        Cp_coefs = [32.24, 0.1923e-2, 1.055e-5, -3.595e-9]
+        super().__init__(M, R, property_table, Cp_coefs)
 
 if __name__ == "__main__":
     print(H2O(phase="vapor").enthalpy(25))
