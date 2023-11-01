@@ -1,5 +1,4 @@
 import abc
-import pandas as pd
 from six import add_metaclass
 from scipy.interpolate import interp1d
 
@@ -71,6 +70,3 @@ class Ar(IdealGas):
         M = 39.948 # kg/kmol
         Cp_coefs = [2.5,	0.00E+00,	0.00E+00,	0.00E+00,	0.00E+00,	0.00E+00,	0.00E+00]
         super().__init__(M, Cp_coefs)
-
-if __name__ == "__main__":
-    print(H2O(phase="vapor").enthalpy(25))

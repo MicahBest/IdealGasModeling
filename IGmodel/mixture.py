@@ -33,3 +33,4 @@ class Mixture:
 if __name__ == "__main__":
     mixture = Mixture(T=1300, P=3000, N2=0.79, O2=0.21)
     print(mixture)
+    
