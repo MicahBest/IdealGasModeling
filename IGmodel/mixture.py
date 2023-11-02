@@ -51,7 +51,7 @@ class Mixture:
         self.u = self.h - P*self.v
 
         # specific entropy calculation
-        GT = np.array([np.log(T)] + [i for i in FT[:-1]])
+        GT = np.array([np.log(T)] + list(FT[:-1]))
         self.s = self.R*np.dot(self.Cp_coefs, GT) - self.R*np.log(P)
 
 
