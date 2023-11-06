@@ -2,6 +2,7 @@ import numpy as np
 import pandas as pd
 
 Ru = 8.31447 # kJ/kmol-K
+Tref = 298.15 # K (or 25 C)
 
 class Mixture:
     def __init__(self, N2=0.0, O2=0.0, H2O=0.0, H2=0.0, CO2=0.0, CO=0.0, Ar=0.0) -> None:
@@ -45,7 +46,9 @@ class Mixture:
         # specific enthalpy calculation
         FT = np.array([T**(i+1)/(i+1) for i in order])
         hT = np.dot(self.Cp_coefs, FT)*self.R
-        self.h = hT + self.hfo/self.M
+        FTref = np.array([Tref**(i+1)/(i+1) for i in order])
+        hTref = np.dot(self.Cp_coefs, FTref)*self.R
+        self.h = hT + hTref + self.hfo/self.M
 
         # specific internal energy calculation
         self.u = self.h - P*self.v
