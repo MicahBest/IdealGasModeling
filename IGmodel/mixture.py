@@ -36,7 +36,19 @@ class Mixture:
         self.u = 0.0    # kJ/kg
         self.s = 0.0    # kJ/kg-K
 
-    def calculate_properties(self, T=None, P=None, v=None, h=None, u=None, s=None):
+    def calculate_properties(self, T=None, P=None, v=None, h=None, u=None, s=None) -> None:
+        """
+        Function call to calculate all properties of the mixture. Function call must include one of the following pairs of
+        property values: (T, P), (T, v), (P, v), (P, u), (P, h), (P, s), (v, u), (v, h), (v, s).
+
+        Args:
+            - T (float) : temperature               [K]
+            - P (float) : pressure                  [kPa]
+            - v (float) : specific volume           [m^3/kg]
+            - h (float) : specific enthalpy         [kJ/kg]
+            - u (float) : specific internal energy  [K]
+            - s (float) : specific entropy          [kJ/kg-K]
+        """
         if T and P:
             self.T = T
             self.P = P
@@ -73,6 +85,8 @@ class Mixture:
             self.v = v
             self.s = s
             self._calculate_properties_vs(v=v, s=s)
+        else:
+            raise AttributeError("Wrong set of variables passed in. Please try using a pair from documentation.")
 
     def _calculate_properties_TP(self, T, P):
         """Explicitly calculates properties from known temperature and pressure."""
@@ -150,21 +164,27 @@ class Mixture:
         self.s = self.R*np.dot(self.Cp_coefs, GT) - self.R*np.log(self.P)
 
     def _calculate_properties_Pu(self, P, u):
+        """Implicitly calculates properties from known pressure and specific internal energy."""
         pass
 
     def _calculate_properties_Ph(self, P, h):
+        """Implicitly calculates properties from known pressure and specific enthalpy."""
         pass
 
     def _calculate_properties_Ps(self, P, s):
+        """Implicitly calculates properties from known pressure and specific entropy."""
         pass
 
     def _calculate_properties_vu(self, v, u):
+        """Implicitly calculates properties from known specific volume and specific internal energy."""
         pass
 
     def _calculate_properties_vh(self, v, h):
+        """Implicitly calculates properties from known specific volume and specific enthalpy."""
         pass
 
     def _calculate_properties_vs(self, v, s):
+        """Implicitly calculates properties from known specific volume and specific entropy."""
         pass
 
     def __repr__(self):
