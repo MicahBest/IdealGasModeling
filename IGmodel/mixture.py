@@ -36,7 +36,7 @@ class Mixture:
         self.u = 0.0    # kJ/kg
         self.s = 0.0    # kJ/kg-K
 
-    def calculate_properties(self, T=None, P=None, v=None, h=None, u=None, s=None):
+    def calculate_properties(self, T=None, P=None, v=None, h=None, u=None, s=None): #pylint:disable=unused-argument
         if T and P:
             self.T = T
             self.P = P
