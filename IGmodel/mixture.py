@@ -165,27 +165,21 @@ class Mixture:
 
     def _calculate_properties_Pu(self, P, u):
         """Implicitly calculates properties from known pressure and specific internal energy."""
-        pass
 
     def _calculate_properties_Ph(self, P, h):
         """Implicitly calculates properties from known pressure and specific enthalpy."""
-        pass
 
     def _calculate_properties_Ps(self, P, s):
         """Implicitly calculates properties from known pressure and specific entropy."""
-        pass
 
     def _calculate_properties_vu(self, v, u):
         """Implicitly calculates properties from known specific volume and specific internal energy."""
-        pass
 
     def _calculate_properties_vh(self, v, h):
         """Implicitly calculates properties from known specific volume and specific enthalpy."""
-        pass
 
     def _calculate_properties_vs(self, v, s):
         """Implicitly calculates properties from known specific volume and specific entropy."""
-        pass
 
     def __repr__(self):
         """Prints mixture info."""
