@@ -200,6 +200,15 @@ class Mixture:
 
     def _calculate_properties_Ps(self, P, s):
         """Implicitly calculates properties from known pressure and specific entropy."""
+        iteration = 0
+        T = 300 # K, abstract starting temperature
+        dT = T - TOL
+        while abs(dT) >= TOL and iteration < MAX_ITER:
+            self._calculate_properties_TP(T=T, P=P)
+            ds = s - self.s
+            dT = T*(np.exp(ds/self.Cp) - 1)
+            T += dT
+            iteration += 1
 
     def _calculate_properties_vu(self, v, u):
         """Implicitly calculates properties from known specific volume and specific internal energy."""
@@ -244,4 +253,5 @@ if __name__ == "__main__":
     mixture.calculate_properties(P=100, v=1)
     mixture.calculate_properties(P=1000, u=-2700)
     mixture.calculate_properties(P=1000, h=-2000)
+    mixture.calculate_properties(P=100, s=5.0)
     print(mixture)
