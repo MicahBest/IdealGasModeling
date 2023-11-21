@@ -3,6 +3,8 @@ import pandas as pd
 
 Ru = 8.31447 # kJ/kmol-K
 Tref = 298.15 # K (or 25 C)
+TOL = 1e-12
+MAX_ITER = 25
 
 class Mixture:
     def __init__(self, N2=0.0, O2=0.0, H2O=0.0, H2=0.0, CO2=0.0, CO=0.0, Ar=0.0) -> None:
@@ -90,6 +92,9 @@ class Mixture:
 
     def _calculate_properties_TP(self, T, P):
         """Explicitly calculates properties from known temperature and pressure."""
+        self.T = T
+        self.P = P
+
         # specific heat calculation
         order = np.array([0, 1, 2, 3, 4, 5, 6])
         T_vec = np.array([T**i for i in order])
@@ -115,6 +120,9 @@ class Mixture:
 
     def _calculate_properties_Tv(self, T, v):
         """Explicitly calculates properties from known temperature and specific volume."""
+        self.T = T
+        self.v = v
+        
         # pressure calculation
         self.P = self.R*T/v
 
@@ -140,6 +148,9 @@ class Mixture:
 
     def _calculate_properties_Pv(self, P, v):
         """Explicitly calculates properties from known pressure and specific volume."""
+        self.P = P
+        self.v = v
+
         # temperature calculation
         self.T = P*v/self.R
 
@@ -165,6 +176,15 @@ class Mixture:
 
     def _calculate_properties_Pu(self, P, u):
         """Implicitly calculates properties from known pressure and specific internal energy."""
+        iteration = 0
+        T = 300 # K, abstract starting temperature
+        dT = T - TOL
+        while abs(dT) >= TOL and iteration < MAX_ITER:
+            self._calculate_properties_TP(T=T, P=P)
+            du = u - self.u
+            dT = du/self.Cv
+            T += dT
+            iteration += 1
 
     def _calculate_properties_Ph(self, P, h):
         """Implicitly calculates properties from known pressure and specific enthalpy."""
@@ -213,4 +233,5 @@ if __name__ == "__main__":
     mixture.calculate_properties(T=1300, P=3000)
     mixture.calculate_properties(T=300, v=1)
     mixture.calculate_properties(P=100, v=1)
+    mixture.calculate_properties(P=1000, u=-2700)
     print(mixture)
