@@ -1,3 +1,115 @@
+import numpy as np
+from IGmodel.mixture import Mixture
+
 def test_init():
-    assert True
-    
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    np.testing.assert_almost_equal(mix.M, 27.605100, decimal=6)
+    np.testing.assert_almost_equal(mix.R,  0.301193, decimal=6)
+
+def test_calculate_TP():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(T=1000.0, P=100.0)
+    np.testing.assert_almost_equal(mix.T,    1000.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.P,     100.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.251108, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      0.949915, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       3.011933, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -2188.238556, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -1887.045298, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       5.934137, decimal=6)
+
+def test_calculate_Tv():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(T=1000.0, v=0.5)
+    np.testing.assert_almost_equal(mix.T,    1000.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.P,     602.386516, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.251108, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      0.949915, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       0.500000, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -2188.238556, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -1887.045298, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       5.393275, decimal=6)
+
+def test_calculate_Pv():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(P=1000.0, v=0.5)
+    np.testing.assert_almost_equal(mix.T,    1660.063720, decimal=6)
+    np.testing.assert_almost_equal(mix.P,    1000.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.359002, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      1.057809, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       0.500000, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -1521.533496, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -1021.533496, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       5.902921, decimal=6)
+
+def test_calculate_Pu():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(P=1000.0, u=-2500.0)
+    np.testing.assert_almost_equal(mix.T,     656.549564, decimal=6)
+    np.testing.assert_almost_equal(mix.P,    1000.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.163719, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      0.862526, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       0.197748, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -2500.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -2302.251698, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       4.733242, decimal=6)
+
+def test_calculate_Ph():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(P=100.0, h=-2000.0)
+    np.testing.assert_almost_equal(mix.T,     908.951960, decimal=6)
+    np.testing.assert_almost_equal(mix.P,     100.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.229835, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      0.928641, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       2.737702, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -2273.770202, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -2000.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       5.815721, decimal=6)
+
+def test_calculate_Ps():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(P=100.0, s=5.0)
+    np.testing.assert_almost_equal(mix.T,     450.558859, decimal=6)
+    np.testing.assert_almost_equal(mix.P,     100.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.107168, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      0.805975, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       1.357053, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -2671.808664, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -2536.103373, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       5.000000, decimal=6)
+
+def test_calculate_vu():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(v=2.0, u=-1500.0)
+    np.testing.assert_almost_equal(mix.T,    1680.398337, decimal=6)
+    np.testing.assert_almost_equal(mix.P,     253.062325, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.361292, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      1.060099, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       2.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -1500.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.h,    -993.875351, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       6.333356, decimal=6)
+
+def test_calculate_vh():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(v=2.0, h=-1500.0)
+    np.testing.assert_almost_equal(mix.T,    1301.915856, decimal=6)
+    np.testing.assert_almost_equal(mix.P,     196.064139, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.309812, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      1.008619, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       2.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -1892.128278, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -1500.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       6.069240, decimal=6)
+
+def test_calculate_vs():
+    mix = Mixture(N2=0.4, O2=0.1, H2O=0.1, H2=0.1, CO2=0.1, CO=0.1, Ar=0.1)
+    mix.calculate_properties(v=2.0, s=6.0)
+    np.testing.assert_almost_equal(mix.T,    1214.913946, decimal=6)
+    np.testing.assert_almost_equal(mix.P,     182.961945, decimal=6)
+    np.testing.assert_almost_equal(mix.Cp,      1.294732, decimal=6)
+    np.testing.assert_almost_equal(mix.Cv,      0.993539, decimal=6)
+    np.testing.assert_almost_equal(mix.v,       2.000000, decimal=6)
+    np.testing.assert_almost_equal(mix.u,   -1979.234298, decimal=6)
+    np.testing.assert_almost_equal(mix.h,   -1613.310409, decimal=6)
+    np.testing.assert_almost_equal(mix.s,       6.000000, decimal=6)
