@@ -18,7 +18,7 @@ setup(
     description='General property calculator model for an ideal gas mixture',
     author='Micah Best',
     platforms=["Linux"],
-    build_requires=['numpy>=1.8.0', 'scipy>=0.12.0', "pandas", 'setuptools'],
+    build_requires=['numpy>=1.8.0', 'scipy>=0.12.0', "pandas", 'setuptools', 'pytest'],
     install_requires=['numpy>=1.8.0', 'scipy>=0.12.0', "pandas"],
     license='MIT',
     author_email='micahbest21@gmail.com',
