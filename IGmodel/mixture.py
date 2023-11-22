@@ -11,7 +11,7 @@ class Mixture:
         self._yi = np.array([N2, O2, H2O, H2, CO2, CO, Ar])
         np.testing.assert_almost_equal(self._yi.sum(), 1.0)
 
-        df = pd.read_csv("IGmodel/CpModelTable.csv")
+        df = pd.read_csv("IGmodel/properties/CpModelTable.csv")
 
         # Molar mass
         _Mi = df["M"]
