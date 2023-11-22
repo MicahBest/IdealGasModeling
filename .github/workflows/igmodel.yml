@@ -20,3 +20,6 @@ jobs:
     - name: Analyzing the code with pylint
       run: |
         pylint ./IGmodel
+    - name: Testing code with pytest
+      run: |
+        pytest --basetemp=IGmodel/tests/
