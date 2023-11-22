@@ -21,5 +21,7 @@ class HumidAir(Mixture):
         O2 = 0.21 * Nair/(NH2O + Nair)
         Ar = 0.01 * Nair/(NH2O + Nair)
         H2O = NH2O/(NH2O + Nair)
+
         super().__init__(N2=N2, O2=O2, Ar=Ar, H2O=H2O)
+        self.RH = RH
         self.calculate_properties(T=T, P=P)
