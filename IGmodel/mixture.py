@@ -9,6 +9,7 @@ MAX_ITER = 25
 class Mixture:
     def __init__(self, N2=0.0, O2=0.0, H2O=0.0, H2=0.0, CO2=0.0, CO=0.0, Ar=0.0) -> None:
         self._yi = np.array([N2, O2, H2O, H2, CO2, CO, Ar])
+        self._yi *= 1/self._yi.sum()
         np.testing.assert_almost_equal(self._yi.sum(), 1.0)
 
         df = pd.read_csv("IGmodel/properties/CpModelTable.csv")

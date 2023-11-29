@@ -25,12 +25,12 @@ class Fuel:
         self.M = self.yeth*46.069 + self.yoct*114.231
         self.R = Ru/self.M
 
-    @property
-    def enthalpy(self):
-        return self.hfo/self.M + self.Cp*(self.T-Tref)
+        self.v = self.R*self.T/self.P
+        self.h = self.hfo/self.M + self.Cp*(self.T-Tref)
+        self.u = self.h - self.R*self.T
 
-    @property
-    def internal_energy(self):
-        return self.enthalpy - self.R*self.T
+        self.Cv = self.Cp - self.R
+        self.k = 1 + self.Cp/self.R
 
-
+    def calculate_properties(self, T, P):
+        self.__init__(T, P)
