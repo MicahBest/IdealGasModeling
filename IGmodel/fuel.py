@@ -2,7 +2,10 @@ import numpy as np
 from IGmodel.mixture import Ru, Tref
 
 class Fuel:
-    def __init__(self) -> None:
+    def __init__(self, T, P) -> None:
+        self.T = T
+        self.P = P
+
         self.xeth = 0.1 # ethanol %
         self.xoct = 0.9 # octane %
 
@@ -21,5 +24,13 @@ class Fuel:
 
         self.M = self.yeth*46.069 + self.yoct*114.231
         self.R = Ru/self.M
+
+    @property
+    def enthalpy(self):
+        return self.hfo/self.M + self.Cp*(self.T-Tref)
+
+    @property
+    def internal_energy(self):
+        return self.enthalpy - self.R*self.T
 
 
