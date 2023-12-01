@@ -1,12 +1,13 @@
 import numpy as np
 
 class Engine:
-    def __init__(self, cylinders, bore, stroke, compression_ratio, intake_diameter) -> None:
+    def __init__(self, cylinders, bore, stroke, compression_ratio, intake_diameter, exhaust_diameter) -> None:
         self.ncyl = cylinders
         self.bore = bore*0.001      # mm to m
         self.stroke = stroke*0.001  # mm to m
         self.rc = compression_ratio
-        self.intake_diameter = intake_diameter
+        self.intake_diameter = intake_diameter*0.001    # mm to m
+        self.exhaust_diameter = exhaust_diameter*0.001  # mm to m
         self.TDC = self.cyl_volume/(self.rc - 1)
         self.BDC = self.TDC*self.rc
 

@@ -12,9 +12,10 @@ class Fuel:
         self.LHV = self.xeth*26810 + self.xoct*44430
         self.Cp = self.xeth*2.44 + self.xoct*2.23
         self.hfg = self.xeth*919 + self.xoct*363
+        self.density = self.xeth*790 + self.xoct*703
 
-        Neth = self.xeth/46.069
-        Noct = self.xoct/114.231
+        Neth = self.xeth/44.0535
+        Noct = self.xoct/114.232
         N = Neth + Noct
 
         self.yeth = Neth/N
@@ -22,7 +23,7 @@ class Fuel:
 
         self.hfo = self.yeth*-235310 + self.yoct*-208450
 
-        self.M = self.yeth*46.069 + self.yoct*114.231
+        self.M = self.yeth*44.0535 + self.yoct*114.232
         self.R = Ru/self.M
 
         self.v = self.R*self.T/self.P
@@ -30,7 +31,7 @@ class Fuel:
         self.u = self.h - self.R*self.T
 
         self.Cv = self.Cp - self.R
-        self.k = 1 + self.Cp/self.R
+        self.k = self.Cp/(self.Cp-self.R)
 
     def calculate_properties(self, T, P):
         self.__init__(T, P)
