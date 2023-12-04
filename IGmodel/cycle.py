@@ -21,6 +21,8 @@ class CombustionCycle:
         self.omega_deg = self.omega_rpm*360/60 # RPM to deg/s
         self.omega_rad = self.omega_rpm*2*np.pi/60 # RPM to rad/s
 
+        print(f"Crankspeed: {self.omega_rad:.3f} rad/s")
+
         # state 0 : ambient air
         air = HumidAir(self.T, self.P, self.RH)
         T0 = air.T
@@ -34,6 +36,7 @@ class CombustionCycle:
         P2 = fuel.P
         h2 = fuel.h
         v2 = fuel.v
+        print(f"Spec. Vol. Fuel: {v2:.3f}")
 
         # state 1 : air charge-cooled
         P1 = P0
@@ -41,17 +44,24 @@ class CombustionCycle:
         air.calculate_properties(P=P1, h=h1)
         T1 = air.T
         v1 = air.v
+        print(f"Spec. Vol. Air: {v1:.3f}")
 
         # throttle pressure loss calcs
         xair = self.AFR/(self.AFR+1)
         xfuel = 1/(1+self.AFR)
         vi = xair*v1 + xfuel*v2
+        print(f"Spec. Vol. Intake: {vi:.6f}")
         rho = 1/vi
+        print(f"Density Intake Air: {rho:.3f}")
         Vrms = self.engine.stroke*self.omega_rad/(2*np.sqrt(2))
+        print(f"V RMS: {Vrms:.3f}")
         Vdot_rms = np.pi/4*self.engine.bore**2 * Vrms
+        print(f"Vdot RMS: {Vdot_rms:.3f}")
         Vi = (Vdot_rms/2)/(np.pi/4*self.engine.intake_diameter**2)
+        print(f"Intake Velocity: {Vi:.3f}")
         kloss = 5
         deltaP_in = 0.5*rho*Vi**2*kloss/1000 # kPa
+        print(f"Delta P Intake: {deltaP_in:.3f} kPa")
 
         # state 3 : air charge after throttle
         T3 = T1
@@ -161,8 +171,11 @@ class CombustionCycle:
         Ti = (mdead*T10 + mfuel*T11 + mair*T12)/(mdead + mfuel + mair)
         Te = mfuel*fuel.LHV/((mdead + mfuel + mair)*fuel.Cv) + Ti
         Tinf = (Te + Ti)/2
-        Qdot_out = h*As*(Ts-Tinf)
+        print(f"Tinf: {Tinf:.3f}")
+        Qdot_out = -h*As*(Ts-Tinf)
+        print(f"Convection Q-dot-out: {Qdot_out:.3f}")
         Q_out = Qdot_out*delta_t
+        print(f"Convection Q-out: {Q_out:.3f} J")
 
         # combustion mass balance
         Ndead = mdead/deadair.M
@@ -204,6 +217,8 @@ class CombustionCycle:
         T13 = T14 / rcutoff
         v13 = v14 / rcutoff
         P13 = P14
+        print(f"T13: {T13:.3f}")
+        print(f"T14: {T14:.3f}")
 
         # state 15 : combustion products, end of power
         v15 = v14 * self.engine.BDC / V14
@@ -236,6 +251,7 @@ class CombustionCycle:
         tau = viscosity*Vrms/0.22e-3
         A = np.pi*self.engine.bore*0.01e-3
         W_stroke  = tau*A*self.engine.stroke
+        print(f"Mass Products: {m14:.6f} kg")
         Wout_comb = m14*products.R*(T13-T14)
         Wout_power = m14*(u14-u15)
         Win_comp = mdead*(u10-u7) + mfuel*(u11-u8) + mair*(u12-u9)
@@ -248,6 +264,7 @@ class CombustionCycle:
         mdot_fuel = self.engine.ncyl * mfuel * self.omega_rpm/120 # kg/s
         Vdot_fuel = mdot_fuel / fuel.density * 951019.3885 # m^3/s to gal/hr
 
+        print()
         print(f"Combustion time: {delta_t*1000:.3f} ms")
         print(f"Crank pos. at cutoff: {self.omega_deg*delta_t:.3f} deg")
         print(f"Cutoff ratio: {rcutoff:.3f}")
