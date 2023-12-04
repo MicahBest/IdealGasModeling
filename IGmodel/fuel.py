@@ -5,6 +5,7 @@ class Fuel:
     def __init__(self, T, P) -> None:
         self.T = T
         self.P = P
+        self._yi = [0, 0, 0, 0, 0, 0, 0]
 
         self.xeth = 0.1 # ethanol %
         self.xoct = 0.9 # octane %

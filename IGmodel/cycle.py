@@ -1,4 +1,5 @@
 import numpy as np
+import pandas as pd
 from IGmodel.air import HumidAir
 from IGmodel.engine import Engine
 from IGmodel.fuel import Fuel
@@ -16,12 +17,22 @@ class CombustionCycle:
         self.flamespeed = 50 # m/s
         self.states = []
         self.engine = Engine(cylinders=3, bore=74.0, stroke=77.0, compression_ratio=9.5, intake_diameter=35.0, exhaust_diameter=28.0)
+        self.df_out = None
+
+    def print_state(self, i, T, P, mix):
+        print(f"State {i:2d}: T={T:8.3f} | P={P:8.3f} | N2={mix._yi[0]:.3f} | O2={mix._yi[1]:.3f} | H2O={mix._yi[2]:.3f} | H2={mix._yi[3]:.3f} | CO2={mix._yi[4]:.3f} | CO={mix._yi[5]:.3f} | Ar={mix._yi[6]:.3f} | ")
+        new_row = {"T": T, "P": P, "N2": mix._yi[0], "O2": mix._yi[1], "H2O": mix._yi[2], "H2": mix._yi[3], "CO2": mix._yi[4], "CO": mix._yi[5], "Ar": mix._yi[6]}
+        new_df = pd.DataFrame([new_row])
+        if self.df_out is None:
+            self.df_out = new_df
+        else:
+            self.df_out = pd.concat([self.df_out, new_df], ignore_index=True)
 
     def run_cycle_case_1(self):
         self.omega_deg = self.omega_rpm*360/60 # RPM to deg/s
         self.omega_rad = self.omega_rpm*2*np.pi/60 # RPM to rad/s
 
-        print(f"Crankspeed: {self.omega_rad:.3f} rad/s")
+        # print(f"Crankspeed: {self.omega_rad:.3f} rad/s")
 
         # state 0 : ambient air
         air = HumidAir(self.T, self.P, self.RH)
@@ -29,6 +40,7 @@ class CombustionCycle:
         P0 = air.P
         h0 = air.h
         v0 = air.v
+        self.print_state(0, T0, P0, air)
 
         # state 2 : fuel vapor charge
         fuel = Fuel(T=Tref, P=self.P)
@@ -36,7 +48,7 @@ class CombustionCycle:
         P2 = fuel.P
         h2 = fuel.h
         v2 = fuel.v
-        print(f"Spec. Vol. Fuel: {v2:.3f}")
+        # print(f"Spec. Vol. Fuel: {v2:.3f}")
 
         # state 1 : air charge-cooled
         P1 = P0
@@ -44,24 +56,27 @@ class CombustionCycle:
         air.calculate_properties(P=P1, h=h1)
         T1 = air.T
         v1 = air.v
-        print(f"Spec. Vol. Air: {v1:.3f}")
+        # print(f"Spec. Vol. Air: {v1:.3f}")
+
+        self.print_state(1, T1, P1, air)
+        self.print_state(2, T2, P2, fuel)
 
         # throttle pressure loss calcs
         xair = self.AFR/(self.AFR+1)
         xfuel = 1/(1+self.AFR)
         vi = xair*v1 + xfuel*v2
-        print(f"Spec. Vol. Intake: {vi:.6f}")
+        # print(f"Spec. Vol. Intake: {vi:.6f}")
         rho = 1/vi
-        print(f"Density Intake Air: {rho:.3f}")
+        # print(f"Density Intake Air: {rho:.3f}")
         Vrms = self.engine.stroke*self.omega_rad/(2*np.sqrt(2))
-        print(f"V RMS: {Vrms:.3f}")
+        # print(f"V RMS: {Vrms:.3f}")
         Vdot_rms = np.pi/4*self.engine.bore**2 * Vrms
-        print(f"Vdot RMS: {Vdot_rms:.3f}")
+        # print(f"Vdot RMS: {Vdot_rms:.3f}")
         Vi = (Vdot_rms/2)/(np.pi/4*self.engine.intake_diameter**2)
-        print(f"Intake Velocity: {Vi:.3f}")
+        # print(f"Intake Velocity: {Vi:.3f}")
         kloss = 5
         deltaP_in = 0.5*rho*Vi**2*kloss/1000 # kPa
-        print(f"Delta P Intake: {deltaP_in:.3f} kPa")
+        # print(f"Delta P Intake: {deltaP_in:.3f} kPa")
 
         # state 3 : air charge after throttle
         T3 = T1
@@ -70,6 +85,7 @@ class CombustionCycle:
         v3 = air.v
         u3 = air.u
         s3 = air.s
+        self.print_state(3, T3, P3, air)
 
         # state 4 : fuel charge after throttle
         T4 = T2
@@ -77,6 +93,7 @@ class CombustionCycle:
         fuel.calculate_properties(T=T4, P=P4)
         v4 = fuel.v
         u4 = fuel.u
+        self.print_state(4, T4, P4, fuel)
 
         # state 5 : dead air mass post combustion
         T5 = 700 # K
@@ -85,6 +102,7 @@ class CombustionCycle:
         deadair.calculate_properties(T=T5, P=P5)
         v5 = deadair.v
         s5 = deadair.s
+        self.print_state(5, T5, P5, deadair)
 
         # state 6 : dead air mass, expanded
         P6 = P4
@@ -95,6 +113,7 @@ class CombustionCycle:
         u6 = deadair.u
         V6 = self.engine.TDC
         mdead = V6/v6
+        self.print_state(6, T6, P6, deadair)
 
         # state 7 : dead air mass, shift position
         T7 = T6
@@ -103,12 +122,14 @@ class CombustionCycle:
         u7 = u6
         V7 = V6
         s7 = s6
+        self.print_state(7, T7, P7, deadair)
 
         # state 8 : fuel vapor from state 4
         T8 = T4
         P8 = P4
         v8 = v4
         u8 = u4
+        self.print_state(8, T8, P8, fuel)
 
         # state 9 : fresh air from state 3
         T9 = T3
@@ -116,6 +137,7 @@ class CombustionCycle:
         v9 = v3
         u9 = u3
         s9 = s3
+        self.print_state(9, T9, P9, air)
 
         # mass calcs
         Vcharge = self.engine.BDC - V7
@@ -129,6 +151,7 @@ class CombustionCycle:
         T10 = deadair.T
         P10 = deadair.P
         u10 = deadair.u
+        self.print_state(10, T10, P10, deadair)
 
         N_H2O_10 = deadair._yi[2]
         N_H2_10 = deadair._yi[3]
@@ -143,6 +166,7 @@ class CombustionCycle:
         P11 = fuel.P
         h11 = fuel.h
         u11 = fuel.u
+        self.print_state(11, T11, P11, fuel)
 
         # state 12 : fresh air after compression
         s12 = s9
@@ -151,6 +175,7 @@ class CombustionCycle:
         T12 = air.T
         P12 = air.P
         u12 = air.u
+        self.print_state(12, T12, P12, air)
 
         N_N2_12 = air._yi[0]
         N_O2_12 = air._yi[1]
@@ -171,11 +196,11 @@ class CombustionCycle:
         Ti = (mdead*T10 + mfuel*T11 + mair*T12)/(mdead + mfuel + mair)
         Te = mfuel*fuel.LHV/((mdead + mfuel + mair)*fuel.Cv) + Ti
         Tinf = (Te + Ti)/2
-        print(f"Tinf: {Tinf:.3f}")
+        # print(f"Tinf: {Tinf:.3f}")
         Qdot_out = -h*As*(Ts-Tinf)
-        print(f"Convection Q-dot-out: {Qdot_out:.3f}")
+        # print(f"Convection Q-dot-out: {Qdot_out:.3f}")
         Q_out = Qdot_out*delta_t
-        print(f"Convection Q-out: {Q_out:.3f} J")
+        # print(f"Convection Q-out: {Q_out:.3f} J")
 
         # combustion mass balance
         Ndead = mdead/deadair.M
@@ -217,8 +242,8 @@ class CombustionCycle:
         T13 = T14 / rcutoff
         v13 = v14 / rcutoff
         P13 = P14
-        print(f"T13: {T13:.3f}")
-        print(f"T14: {T14:.3f}")
+        self.print_state(13, T13, P13, products)
+        self.print_state(14, T14, P14, products)
 
         # state 15 : combustion products, end of power
         v15 = v14 * self.engine.BDC / V14
@@ -227,6 +252,7 @@ class CombustionCycle:
         T15 = products.T
         P15 = products.P
         u15 = products.u
+        self.print_state(15, T15, P15, air)
 
         # state 16 : combustion products, expanded
         rho16 = 1/v15
@@ -241,6 +267,7 @@ class CombustionCycle:
         h16 = products.h
         V16 = m14*v16
         Vexpel = self.engine.TDC - V16
+        self.print_state(16, T16, P16, air)
 
         # computing Wnet,cycle
         W_intake  = deltaP_in * (self.engine.BDC - V6) # kJ
@@ -251,7 +278,7 @@ class CombustionCycle:
         tau = viscosity*Vrms/0.22e-3
         A = np.pi*self.engine.bore*0.01e-3
         W_stroke  = tau*A*self.engine.stroke
-        print(f"Mass Products: {m14:.6f} kg")
+        # print(f"Mass Products: {m14:.6f} kg")
         Wout_comb = m14*products.R*(T13-T14)
         Wout_power = m14*(u14-u15)
         Win_comp = mdead*(u10-u7) + mfuel*(u11-u8) + mair*(u12-u9)
@@ -263,6 +290,8 @@ class CombustionCycle:
         Power = self.engine.ncyl * Wnet * self.omega_rpm/120
         mdot_fuel = self.engine.ncyl * mfuel * self.omega_rpm/120 # kg/s
         Vdot_fuel = mdot_fuel / fuel.density * 951019.3885 # m^3/s to gal/hr
+
+        self.df_out.to_csv("Case1.csv")
 
         print()
         print(f"Combustion time: {delta_t*1000:.3f} ms")
@@ -296,12 +325,15 @@ class CombustionCycle:
             self.omega_rad = self.omega_rpm*2*np.pi/60 # RPM to rad/s
 
             nIter += 1
+
             # state 0 : ambient air
             air = HumidAir(self.T, self.P, self.RH)
             T0 = air.T
             P0 = air.P
             h0 = air.h
             v0 = air.v
+            if nIter == maxIter - 1:
+                self.print_state(0, T0, P0, air)
 
             # state 2 : fuel vapor charge
             fuel = Fuel(T=Tref, P=self.P)
@@ -309,6 +341,7 @@ class CombustionCycle:
             P2 = fuel.P
             h2 = fuel.h
             v2 = fuel.v
+            # print(f"Spec. Vol. Fuel: {v2:.3f}")
 
             # state 1 : air charge-cooled
             P1 = P0
@@ -316,17 +349,28 @@ class CombustionCycle:
             air.calculate_properties(P=P1, h=h1)
             T1 = air.T
             v1 = air.v
+            # print(f"Spec. Vol. Air: {v1:.3f}")
+
+            if nIter == maxIter - 1:
+                self.print_state(1, T1, P1, air)
+                self.print_state(2, T2, P2, fuel)
 
             # throttle pressure loss calcs
             xair = self.AFR/(self.AFR+1)
             xfuel = 1/(1+self.AFR)
             vi = xair*v1 + xfuel*v2
+            # print(f"Spec. Vol. Intake: {vi:.6f}")
             rho = 1/vi
+            # print(f"Density Intake Air: {rho:.3f}")
             Vrms = self.engine.stroke*self.omega_rad/(2*np.sqrt(2))
+            # print(f"V RMS: {Vrms:.3f}")
             Vdot_rms = np.pi/4*self.engine.bore**2 * Vrms
+            # print(f"Vdot RMS: {Vdot_rms:.3f}")
             Vi = (Vdot_rms/2)/(np.pi/4*self.engine.intake_diameter**2)
+            # print(f"Intake Velocity: {Vi:.3f}")
             kloss = 5
             deltaP_in = 0.5*rho*Vi**2*kloss/1000 # kPa
+            # print(f"Delta P Intake: {deltaP_in:.3f} kPa")
 
             # state 3 : air charge after throttle
             T3 = T1
@@ -335,6 +379,8 @@ class CombustionCycle:
             v3 = air.v
             u3 = air.u
             s3 = air.s
+            if nIter == maxIter - 1:
+                self.print_state(3, T3, P3, air)
 
             # state 4 : fuel charge after throttle
             T4 = T2
@@ -342,6 +388,8 @@ class CombustionCycle:
             fuel.calculate_properties(T=T4, P=P4)
             v4 = fuel.v
             u4 = fuel.u
+            if nIter == maxIter - 1:
+                self.print_state(4, T4, P4, fuel)
 
             # state 5 : dead air mass post combustion
             T5 = 700 # K
@@ -350,6 +398,8 @@ class CombustionCycle:
             deadair.calculate_properties(T=T5, P=P5)
             v5 = deadair.v
             s5 = deadair.s
+            if nIter == maxIter - 1:
+                self.print_state(5, T5, P5, deadair)
 
             # state 6 : dead air mass, expanded
             P6 = P4
@@ -360,6 +410,8 @@ class CombustionCycle:
             u6 = deadair.u
             V6 = self.engine.TDC
             mdead = V6/v6
+            if nIter == maxIter - 1:
+                self.print_state(6, T6, P6, deadair)
 
             # state 7 : dead air mass, shift position
             T7 = T6
@@ -368,12 +420,16 @@ class CombustionCycle:
             u7 = u6
             V7 = V6
             s7 = s6
+            if nIter == maxIter - 1:
+                self.print_state(7, T7, P7, deadair)
 
             # state 8 : fuel vapor from state 4
             T8 = T4
             P8 = P4
             v8 = v4
             u8 = u4
+            if nIter == maxIter - 1:
+                self.print_state(8, T8, P8, fuel)
 
             # state 9 : fresh air from state 3
             T9 = T3
@@ -381,6 +437,8 @@ class CombustionCycle:
             v9 = v3
             u9 = u3
             s9 = s3
+            if nIter == maxIter - 1:
+                self.print_state(9, T9, P9, air)
 
             # mass calcs
             Vcharge = self.engine.BDC - V7
@@ -394,6 +452,8 @@ class CombustionCycle:
             T10 = deadair.T
             P10 = deadair.P
             u10 = deadair.u
+            if nIter == maxIter - 1:
+                self.print_state(10, T10, P10, deadair)
 
             N_H2O_10 = deadair._yi[2]
             N_H2_10 = deadair._yi[3]
@@ -408,6 +468,8 @@ class CombustionCycle:
             P11 = fuel.P
             h11 = fuel.h
             u11 = fuel.u
+            if nIter == maxIter - 1:
+                self.print_state(11, T11, P11, fuel)
 
             # state 12 : fresh air after compression
             s12 = s9
@@ -416,6 +478,8 @@ class CombustionCycle:
             T12 = air.T
             P12 = air.P
             u12 = air.u
+            if nIter == maxIter - 1:
+                self.print_state(12, T12, P12, air)
 
             N_N2_12 = air._yi[0]
             N_O2_12 = air._yi[1]
@@ -436,8 +500,11 @@ class CombustionCycle:
             Ti = (mdead*T10 + mfuel*T11 + mair*T12)/(mdead + mfuel + mair)
             Te = mfuel*fuel.LHV/((mdead + mfuel + mair)*fuel.Cv) + Ti
             Tinf = (Te + Ti)/2
-            Qdot_out = h*As*(Ts-Tinf)
+            # print(f"Tinf: {Tinf:.3f}")
+            Qdot_out = -h*As*(Ts-Tinf)
+            # print(f"Convection Q-dot-out: {Qdot_out:.3f}")
             Q_out = Qdot_out*delta_t
+            # print(f"Convection Q-out: {Q_out:.3f} J")
 
             # combustion mass balance
             Ndead = mdead/deadair.M
@@ -479,6 +546,9 @@ class CombustionCycle:
             T13 = T14 / rcutoff
             v13 = v14 / rcutoff
             P13 = P14
+            if nIter == maxIter - 1:
+                self.print_state(13, T13, P13, products)
+                self.print_state(14, T14, P14, products)
 
             # state 15 : combustion products, end of power
             v15 = v14 * self.engine.BDC / V14
@@ -487,6 +557,8 @@ class CombustionCycle:
             T15 = products.T
             P15 = products.P
             u15 = products.u
+            if nIter == maxIter - 1:
+                self.print_state(15, T15, P15, air)
 
             # state 16 : combustion products, expanded
             rho16 = 1/v15
@@ -501,6 +573,8 @@ class CombustionCycle:
             h16 = products.h
             V16 = m14*v16
             Vexpel = self.engine.TDC - V16
+            if nIter == maxIter - 1:
+                self.print_state(16, T16, P16, air)
 
             # computing Wnet,cycle
             W_intake  = deltaP_in * (self.engine.BDC - V6) # kJ
@@ -511,6 +585,7 @@ class CombustionCycle:
             tau = viscosity*Vrms/0.22e-3
             A = np.pi*self.engine.bore*0.01e-3
             W_stroke  = tau*A*self.engine.stroke
+            # print(f"Mass Products: {m14:.6f} kg")
             Wout_comb = m14*products.R*(T13-T14)
             Wout_power = m14*(u14-u15)
             Win_comp = mdead*(u10-u7) + mfuel*(u11-u8) + mair*(u12-u9)
@@ -538,6 +613,8 @@ class CombustionCycle:
             Wdot_crank = Wdot_mech/eta_transmission
 
             self.omega_rpm += update_rate*(Wdot_crank-Power)
+
+        self.df_out.to_csv("Case2.csv")
 
         print(f"Speed: {self.carspeed:.3f} mph")
         print(f"Speed: {self.carspeed*0.44704:.3f} m/s")
